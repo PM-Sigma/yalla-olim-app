@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Yalla · יאללה</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="device">
+
+  <!-- ===== ONBOARDING ===== -->
+  <section id="onboarding" class="screen active">
+    <button class="lang-btn ob-top" data-action="lang"></button>
+
+    <div class="ob-step active" data-step="0">
+      <div class="ob-logo">🌅</div>
+      <h1 class="ob-title" data-i18n="appName"></h1>
+      <p class="ob-sub" data-i18n="tagline"></p>
+      <button class="btn-primary" data-action="ob-next" data-i18n="getStarted"></button>
+    </div>
+
+    <div class="ob-step" data-step="1">
+      <h1 class="ob-title" data-i18n="ob_interests"></h1>
+      <div class="field">
+        <label data-i18n="ob_name"></label>
+        <input id="f-name" type="text" autocomplete="off">
+      </div>
+      <div class="field" style="flex-direction:row;gap:12px">
+        <div class="field" style="flex:1">
+          <label data-i18n="ob_age"></label>
+          <input id="f-age" type="number" min="18" max="40" value="25">
+        </div>
+        <div class="field" style="flex:1">
+          <label data-i18n="ob_from"></label>
+          <select id="f-from"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label data-i18n="ob_city"></label>
+        <select id="f-city"></select>
+      </div>
+      <div class="field">
+        <label data-i18n="ob_pick"></label>
+        <div class="chips" id="f-interests"></div>
+      </div>
+      <button class="btn-primary" data-action="ob-go" data-i18n="ob_go"></button>
+      <button class="btn-text" data-action="ob-skip" data-i18n="skip"></button>
+    </div>
+  </section>
+
+  <!-- ===== APP ===== -->
+  <section id="app" class="screen">
+    <header class="topbar">
+      <span class="wordmark" data-i18n="appName"></span>
+      <span class="spacer"></span>
+      <button class="chip ghost" data-action="filter"><span id="city-chip"></span> ▾</button>
+      <button class="icon-btn" data-view="calendar" aria-label="calendar">📅</button>
+      <button class="lang-btn" data-action="lang"></button>
+    </header>
+
+    <div id="push" class="push"><span id="push-text"></span><button class="push-view" data-action="push-view" data-i18n="push_view"></button><button class="push-x" data-action="push-dismiss" aria-label="dismiss">✕</button></div>
+
+    <div class="main">
+      <div class="view active" id="view-discover">
+        <div class="deck" id="deck-act"></div>
+        <div class="actions">
+          <button class="fab sm skip" data-swipe="left" aria-label="skip">✕</button>
+          <button class="fab super" data-swipe="super" aria-label="super">★</button>
+          <button class="fab like" data-swipe="right" aria-label="like">♥</button>
+        </div>
+      </div>
+
+      <div class="view" id="view-people">
+        <div class="deck" id="deck-ppl"></div>
+        <div class="actions">
+          <button class="fab sm skip" data-swipe="left" data-deck="ppl" aria-label="pass">✕</button>
+          <button class="fab super" data-swipe="super" data-deck="ppl" aria-label="super">★</button>
+          <button class="fab like teal" data-swipe="right" data-deck="ppl" aria-label="like">♥</button>
+        </div>
+      </div>
+
+      <div class="view" id="view-map">
+        <div class="maptabs" id="map-tabs"></div>
+        <div class="mapwrap"><div class="citymap" id="citymap"></div></div>
+      </div>
+
+      <div class="view" id="view-saved">
+        <div class="tabs">
+          <button class="seg active" data-savedtab="act" data-i18n="saved_tab_act"></button>
+          <button class="seg" data-savedtab="match" data-i18n="saved_tab_match"></button>
+        </div>
+        <div id="saved-list" class="list"></div>
+      </div>
+
+      <div class="view" id="view-profile"><div id="profile-body" class="profile"></div></div>
+
+      <div class="view" id="view-calendar">
+        <div class="cal-head">
+          <button class="chip ghost" data-view="profile" data-i18n="cal_back"></button>
+          <h2 data-i18n="cal_title"></h2>
+        </div>
+        <div id="cal-list" class="list"></div>
+      </div>
+
+      <div class="view" id="view-pickup">
+        <div class="cal-head"><h2 data-i18n="pickup_title"></h2></div>
+        <p class="view-sub" data-i18n="pickup_sub"></p>
+        <div id="pickup-list" class="list"></div>
+      </div>
+
+      <div class="view" id="view-myevents">
+        <div class="cal-head">
+          <h2 data-i18n="myevents_title"></h2>
+          <span style="flex:1"></span>
+          <button class="cal-btn g" data-action="create-open" data-i18n="create_btn"></button>
+        </div>
+        <div id="myevents-list" class="list"></div>
+      </div>
+    </div>
+
+    <nav class="bottomnav" id="nav">
+      <button class="navbtn active" data-view="discover"><span class="ico">🔥</span><span data-i18n="nav_discover"></span></button>
+      <button class="navbtn" data-view="pickup"><span class="ico">⚡</span><span data-i18n="nav_pickup"></span></button>
+      <button class="navbtn" data-view="people"><span class="ico">💞</span><span data-i18n="nav_people"></span></button>
+      <button class="navbtn" data-view="map"><span class="ico">📍</span><span data-i18n="nav_map"></span></button>
+      <button class="navbtn" data-view="saved"><span class="ico">⭐</span><span data-i18n="nav_saved"></span></button>
+      <button class="navbtn" data-view="profile"><span class="ico">🧑</span><span data-i18n="nav_profile"></span></button>
+    </nav>
+  </section>
+
+  <!-- ===== OVERLAYS ===== -->
+  <div class="overlay" id="overlay-filter">
+    <div class="sheet">
+      <button class="close" data-action="close-overlay">✕</button>
+      <h2 data-i18n="filter_title"></h2>
+      <div class="field"><label data-i18n="filter_city"></label><select id="filter-city"></select></div>
+      <div class="field" style="margin-top:14px">
+        <label><span data-i18n="filter_radius"></span>: <span class="range-val" id="radius-val"></span> <span data-i18n="km"></span></label>
+        <input class="range" id="filter-radius" type="range" min="1" max="10" step="1" value="10">
+      </div>
+      <button class="btn-primary" data-action="apply-filter" data-i18n="filter_apply" style="width:100%"></button>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay-detail"><div class="sheet" id="detail-body"></div></div>
+
+  <div class="overlay" id="overlay-create">
+    <div class="sheet">
+      <button class="close" data-action="close-overlay">✕</button>
+      <h2 data-i18n="create_title"></h2>
+      <div class="field"><label data-i18n="cv_name"></label><input id="cv-name" type="text" autocomplete="off"></div>
+      <div class="field"><label data-i18n="cv_cat"></label><select id="cv-cat"></select></div>
+      <div class="field"><label data-i18n="filter_city"></label><select id="cv-city"></select></div>
+      <div class="field" style="flex-direction:row;gap:12px">
+        <div class="field" style="flex:1"><label data-i18n="cv_day"></label><select id="cv-day"></select></div>
+        <div class="field" style="flex:1"><label data-i18n="cv_time"></label><input id="cv-time" type="time" value="19:00"></div>
+      </div>
+      <div class="field"><label data-i18n="cv_cap"></label><input id="cv-cap" type="number" min="2" max="50" value="10"></div>
+      <div class="field"><label data-i18n="cv_loc"></label><input id="cv-loc" type="text" autocomplete="off"></div>
+      <button class="btn-primary" data-action="create-submit" data-i18n="cv_submit" style="width:100%"></button>
+    </div>
+  </div>
+
+  <div class="overlay" id="match"><div class="sheet" id="match-body"></div></div>
+
+  <div id="toast"><div class="bubble"></div></div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
