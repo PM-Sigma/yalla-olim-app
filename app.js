@@ -175,7 +175,7 @@ function joinPickup(id){
   state.pickupJoined.push(id);save();
   var p=PICKUP.find(function(x){return x.id===id;});
   toast(p&&pkSpots(p)===0?t("pickup_full"):t("pickup_joined"));
-  renderPickup();
+  renderPickup();renderSaved();
 }
 
 /* ---- my events + create ---- */
@@ -220,8 +220,12 @@ function renderSaved(){
   $$(".seg[data-savedtab]").forEach(s=>s.classList.toggle("active",s.dataset.savedtab===state.savedTab));
   const host=$("#saved-list");
   if(state.savedTab==="act"){
-    const items=state.saved.map(id=>ACTIVITIES.find(a=>a.id===id)).filter(Boolean);
-    host.innerHTML=items.length?items.map(a=>`<div class="row" data-open-act="${a.id}"><div class="thumb act">${a.emoji}</div><div class="info"><h3>${tr(a.title)}</h3><p>${tr(a.when)} · 👥 ${a.attendees}/${capacityOf(a)}</p></div><span class="go">›</span></div>`).join(""):`<div class="empty">${t("saved_empty")}</div>`;
+    const acts=state.saved.map(id=>ACTIVITIES.find(a=>a.id===id)).filter(Boolean);
+    const picks=state.pickupJoined.map(id=>PICKUP.find(p=>p.id===id)).filter(Boolean);
+    if(!acts.length&&!picks.length){host.innerHTML=`<div class="empty">${t("saved_empty")}</div>`;}
+    else host.innerHTML=
+      acts.map(a=>`<div class="row" data-open-act="${a.id}"><div class="thumb act">${a.emoji}</div><div class="info"><h3>${tr(a.title)}</h3><p>${tr(a.when)} · 👥 ${a.attendees}/${capacityOf(a)}</p></div><span class="go">›</span></div>`).join("")
+      + picks.map(p=>`<div class="row" data-view="pickup"><div class="thumb act">${p.emoji}</div><div class="info"><h3>${tr(p.sport)} ⚡</h3><p>${t("nav_pickup")} · ${t("pickup_in").replace("{n}",p.inMin)} · ${tr(p.loc)}</p></div><span class="go">›</span></div>`).join("");
   }else{
     const items=state.matches.map(id=>PEOPLE.find(p=>p.id===id)).filter(Boolean);
     host.innerHTML=items.length?items.map(p=>`<div class="row"><div class="thumb ppl">${p.flag}</div><div class="info"><h3>${p.name}, ${p.age}</h3><p>${tr(p.country)} · ${tr(p.bio)}</p></div><span class="go">💬</span></div>`).join(""):`<div class="empty">${t("matches_empty")}</div>`;
