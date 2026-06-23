@@ -141,6 +141,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .row .info h3{font-size:16px;font-weight:700}
 .row .info p{font-size:13px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .go{font-size:13px;font-weight:700;color:var(--magenta)}
+.row-x{width:30px;height:30px;border-radius:50%;background:var(--sand-2);color:var(--ink-soft);font-size:14px;flex:0 0 auto;line-height:1}
 .tabs{display:flex;gap:8px;padding:10px 18px 4px}
 .seg{flex:1;text-align:center;padding:9px;border-radius:var(--r-md);font-weight:700;font-size:14px;background:#fff;border:1px solid var(--line);color:var(--ink-soft)}
 .seg.active{background:var(--ink);color:#fff;border-color:var(--ink)}

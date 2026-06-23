@@ -10,6 +10,8 @@ All notable changes to **Yalla**. Newest first.
   tapping one jumps to the Fill-in tab.
 
 ### Added
+- **Cancel registration** — remove a saved activity or leave a joined pickup game (✕ on each
+  Saved row, and the activity detail's Join button flips to "Cancel registration").
 - **Activities Calendar** (יומן החוגים) with **Google Calendar** and **`.ics`** export per activity.
 - **Fill-in / pickup feed** (השלמה) — team sports starting in the next 1–2 h that are short on
   players, with a push banner surfacing the most urgent open game.

@@ -163,7 +163,7 @@ function renderPickup(){
     var have=pkHave(p),spots=pkSpots(p),joined=state.pickupJoined.indexOf(p.id)>-1,dots="";
     for(var i=0;i<p.need;i++){dots+=(i<have?'<span class="dot-p on"></span>':'<span class="dot-need"></span>');}
     var btn=spots===0?'<button class="join full" disabled>'+t("pickup_full")+'</button>'
-      :joined?'<button class="join done" data-pk="'+p.id+'">'+t("pickup_joined")+'</button>'
+      :joined?'<button class="join done" data-action="unjoin" data-id="'+p.id+'">'+t("pickup_joined")+' · '+t("cancel_short")+'</button>'
       :'<button class="join" data-pk="'+p.id+'">'+t("pickup_join")+'</button>';
     return '<div class="pk'+(p.inMin<=45?' urgent':'')+'"><div class="top"><span class="emoji">'+p.emoji+'</span><span class="ttl">'+tr(p.sport)+'</span><span class="when">'+t("pickup_in").replace("{n}",p.inMin)+'</span></div>'
       +'<div class="meta2">📍 '+tr(p.loc)+' · '+cityName(p.city)+'</div>'
@@ -177,6 +177,8 @@ function joinPickup(id){
   toast(p&&pkSpots(p)===0?t("pickup_full"):t("pickup_joined"));
   renderPickup();renderSaved();
 }
+function unsave(id){state.saved=state.saved.filter(function(x){return x!==id;});save();toast(t("cancelled"));renderSaved();}
+function unjoin(id){state.pickupJoined=state.pickupJoined.filter(function(x){return x!==id;});save();toast(t("cancelled"));renderPickup();renderSaved();}
 
 /* ---- my events + create ---- */
 var DAYS=[["Sun","ראשון","Sunday"],["Mon","שני","Monday"],["Tue","שלישי","Tuesday"],["Wed","רביעי","Wednesday"],["Thu","חמישי","Thursday"],["Fri","שישי","Friday"],["Sat","שבת","Saturday"]];
@@ -224,8 +226,8 @@ function renderSaved(){
     const picks=state.pickupJoined.map(id=>PICKUP.find(p=>p.id===id)).filter(Boolean);
     if(!acts.length&&!picks.length){host.innerHTML=`<div class="empty">${t("saved_empty")}</div>`;}
     else host.innerHTML=
-      acts.map(a=>`<div class="row" data-open-act="${a.id}"><div class="thumb act">${a.emoji}</div><div class="info"><h3>${tr(a.title)}</h3><p>${tr(a.when)} · 👥 ${a.attendees}/${capacityOf(a)}</p></div><span class="go">›</span></div>`).join("")
-      + picks.map(p=>`<div class="row" data-view="pickup"><div class="thumb act">${p.emoji}</div><div class="info"><h3>${tr(p.sport)} ⚡</h3><p>${t("nav_pickup")} · ${t("pickup_in").replace("{n}",p.inMin)} · ${tr(p.loc)}</p></div><span class="go">›</span></div>`).join("");
+      acts.map(a=>`<div class="row" data-open-act="${a.id}"><div class="thumb act">${a.emoji}</div><div class="info"><h3>${tr(a.title)}</h3><p>${tr(a.when)} · 👥 ${a.attendees}/${capacityOf(a)}</p></div><button class="row-x" data-action="unsave" data-id="${a.id}" aria-label="cancel">✕</button></div>`).join("")
+      + picks.map(p=>`<div class="row" data-view="pickup"><div class="thumb act">${p.emoji}</div><div class="info"><h3>${tr(p.sport)} ⚡</h3><p>${t("nav_pickup")} · ${t("pickup_in").replace("{n}",p.inMin)} · ${tr(p.loc)}</p></div><button class="row-x" data-action="unjoin" data-id="${p.id}" aria-label="cancel">✕</button></div>`).join("");
   }else{
     const items=state.matches.map(id=>PEOPLE.find(p=>p.id===id)).filter(Boolean);
     host.innerHTML=items.length?items.map(p=>`<div class="row"><div class="thumb ppl">${p.flag}</div><div class="info"><h3>${p.name}, ${p.age}</h3><p>${tr(p.country)} · ${tr(p.bio)}</p></div><span class="go">💬</span></div>`).join(""):`<div class="empty">${t("matches_empty")}</div>`;
@@ -254,7 +256,7 @@ function openDetail(a){
     <p style="line-height:1.6;color:var(--ink-soft)">${tr(a.blurb)}</p>
     <div class="pcard" style="margin-top:14px"><div class="k">${t("detail_when")}</div><div class="v">📅 ${tr(a.when)}</div></div>
     <div class="pcard" style="margin-top:10px"><div class="k">${t("detail_signups")}</div><div class="v">👥 ${a.attendees} / ${cap}</div><div class="bar" style="margin-top:8px"><i style="width:${pct}%"></i></div></div>
-    <button class="btn-primary" data-action="join" data-id="${a.id}" style="width:100%;margin-top:16px">${state.saved.includes(a.id)?t("joined"):t("join")}</button>`;
+    ${state.saved.includes(a.id)?`<button class="btn-primary" data-action="unsave" data-id="${a.id}" style="width:100%;margin-top:16px;background:#fff;color:var(--magenta);border:1px solid var(--line);box-shadow:none">${t("cancel")}</button>`:`<button class="btn-primary" data-action="join" data-id="${a.id}" style="width:100%;margin-top:16px">${t("join")}</button>`}`;
   $("#overlay-detail").classList.add("active");
 }
 function showMatch(p){
@@ -319,7 +321,9 @@ function handleAction(act,node){
   else if(act==="apply-filter")applyFilter();
   else if(act==="close-match")$("#match").classList.remove("active");
   else if(act==="close-overlay"){const o=node.closest(".overlay");if(o)o.classList.remove("active");}
-  else if(act==="join"){const id=node.dataset.id;if(!state.saved.includes(id))state.saved.push(id);save();node.textContent=t("joined");toast(t("saved_added"));renderSaved();}
+  else if(act==="join"){const id=node.dataset.id;if(!state.saved.includes(id))state.saved.push(id);save();toast(t("saved_added"));renderSaved();const aj=ACTIVITIES.find(z=>z.id===id);if(aj)openDetail(aj);}
+  else if(act==="unsave"){const id=node.dataset.id;unsave(id);const au=ACTIVITIES.find(z=>z.id===id);if(au&&$("#overlay-detail").classList.contains("active"))openDetail(au);}
+  else if(act==="unjoin"){unjoin(node.dataset.id);}
   else if(act==="gcal"){const g=ACTIVITIES.find(z=>z.id===node.dataset.id);if(g)window.open(gcalUrl(g),"_blank");}
   else if(act==="ics"){const s=ACTIVITIES.find(z=>z.id===node.dataset.id);if(s)downloadICS(s);}
   else if(act==="create-open"){buildCreateForm();$("#overlay-create").classList.add("active");}
